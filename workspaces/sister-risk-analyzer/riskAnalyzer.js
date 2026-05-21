@@ -448,7 +448,12 @@ Reason:
 ${buildReason(riskLevel, signals)}
 
 Suggestion:
-${buildSuggestion(riskLevel)}`,
+${buildSuggestion(riskLevel)}
+
+Commands:
+- "สรุป" = สรุปความเสี่ยงอีกครั้ง
+- "เริ่มใหม่" = เริ่มเคสใหม่
+- "ช่วยเหลือ" = ดูวิธีใช้`,
     riskLevel,
     shouldEndSession: true
   };
@@ -457,7 +462,7 @@ ${buildSuggestion(riskLevel)}`,
 function buildAnswerAndContinue() {
   return {
     mode: MODES.ANSWER_AND_CONTINUE,
-    reply: "โดยทั่วไปให้ตรวจสอบจากช่องทาง official เองก่อนเสมอ อย่ากดลิงก์จาก DM และอย่า connect wallet, sign message หรือ approve token ถ้ายังไม่แน่ใจครับ\n\nถ้าต้องการให้ลองเช็คสรุปความเสี่ยงของเคสนี้ พิมพ์ \"สรุป\" ได้เลยครับ",
+    reply: "โดยทั่วไปให้ตรวจสอบจากช่องทาง official เองก่อนเสมอ อย่ากดลิงก์จาก DM และอย่า connect wallet, sign message หรือ approve token ถ้ายังไม่แน่ใจครับ\n\nพิมพ์ \"ช่วยเหลือ\" เพื่อดูรายละเอียดเพิ่มเติมได้ครับ",
     riskLevel: null,
     shouldEndSession: false
   };

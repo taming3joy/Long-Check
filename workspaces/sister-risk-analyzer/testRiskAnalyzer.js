@@ -1,4 +1,6 @@
 const { analyzeRisk } = require("./riskAnalyzer");
+const config = require("../../src/shared/config");
+const { unloadLocalModel } = require("./localQwenClient");
 
 const cases = [
   {
@@ -28,6 +30,14 @@ async function main() {
     console.log(`Input: ${testCase.text}\n`);
     const result = await analyzeRisk(testCase.text);
     console.log(result);
+  }
+
+  if (!config.useMockLlm && process.env.OLLAMA_UNLOAD_AFTER_TEST !== "false") {
+    await unloadLocalModel({
+      baseUrl: config.localLlm.baseUrl,
+      model: config.localLlm.model
+    });
+    console.log(`\n[long-check] Unloaded local model from Ollama: ${config.localLlm.model}`);
   }
 }
 

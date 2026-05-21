@@ -1,5 +1,9 @@
 const OpenAI = require("openai");
 
+function getNativeOllamaUrl(baseUrl) {
+  return String(baseUrl || "http://localhost:11434/v1").replace(/\/v1\/?$/, "");
+}
+
 function stripThinkingText(text) {
   return String(text || "")
     .replace(/<think>[\s\S]*?<\/think>/gi, "")
@@ -61,8 +65,29 @@ async function callLocalQwen({ baseUrl, model, systemPrompt, userPrompt }) {
   return parseJsonFromModel(responseText);
 }
 
+async function unloadLocalModel({ baseUrl, model }) {
+  const ollamaUrl = getNativeOllamaUrl(baseUrl);
+  const response = await fetch(`${ollamaUrl}/api/chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model,
+      messages: [],
+      keep_alive: 0
+    })
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Failed to unload ${model}: ${response.status} ${body}`);
+  }
+}
+
 module.exports = {
   callLocalQwen,
+  unloadLocalModel,
   parseJsonFromModel,
   stripThinkingText
 };

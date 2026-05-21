@@ -144,6 +144,14 @@ If local LLM mode is enabled, startup logs should include:
 [long-check] Local LLM mode enabled: qwen3:8b at http://localhost:11434/v1
 ```
 
+When you stop the server normally with Ctrl+C, Long-Check asks Ollama to unload the configured local model so GPU memory is released:
+
+```text
+[long-check] Unloaded local model from Ollama: qwen3:8b
+```
+
+If the process is killed forcefully, this cleanup may not run. In that case, unload manually with `npm run ollama:unload` or `ollama stop qwen3:8b`.
+
 ## 6. Expose Local Server to LINE
 
 If using the local ngrok binary in this repo:

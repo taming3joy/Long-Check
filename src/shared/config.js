@@ -10,5 +10,9 @@ module.exports = {
   openai: {
     apiKey: process.env.OPENAI_API_KEY || "",
     model: process.env.OPENAI_MODEL || "gpt-4o-mini"
+  },
+  localLlm: {
+    baseUrl: process.env.OLLAMA_BASE_URL || "http://localhost:11434/v1",
+    model: process.env.OLLAMA_MODEL || "qwen3:4b"
   }
 };

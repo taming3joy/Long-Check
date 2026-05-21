@@ -60,6 +60,30 @@
     "recommended_action_en": "Do not approve transactions if you do not trust the smart contract"
   },
   {
+    "id": "R006",
+    "category": "signature",
+    "pattern_type": "keyword",
+    "patterns": ["sign message", "sign transaction", "wallet signature", "signature request", "เซ็นข้อความ", "เซ็นธุรกรรม", "ลงนาม", "ขอลายเซ็น"],
+    "weight": 6,
+    "force_high": false,
+    "explanation_th": "มีการขอให้เซ็นข้อความหรือเซ็นธุรกรรมผ่านกระเป๋าเงิน",
+    "explanation_en": "Asks the user to sign a wallet message or transaction",
+    "recommended_action_th": "อย่าเซ็นข้อความหรือธุรกรรมหากยังไม่เข้าใจว่ากำลังอนุญาตอะไร",
+    "recommended_action_en": "Do not sign wallet messages or transactions unless you fully understand the request"
+  },
+  {
+    "id": "R006B",
+    "category": "wallet",
+    "pattern_type": "keyword",
+    "patterns": ["connect wallet", "wallet connect", "connect metamask", "เชื่อมกระเป๋า", "เชื่อมต่อ wallet", "เชื่อมต่อกระเป๋า"],
+    "weight": 3,
+    "force_high": false,
+    "explanation_th": "มีการขอให้เชื่อมต่อกระเป๋าเงินกับเว็บไซต์หรือแอป",
+    "explanation_en": "Asks the user to connect a wallet to a website or app",
+    "recommended_action_th": "ตรวจสอบโดเมนและแหล่งที่มาให้ชัดเจนก่อนเชื่อมต่อกระเป๋าเงิน",
+    "recommended_action_en": "Verify the domain and source before connecting a wallet"
+  },
+  {
     "id": "R008",
     "category": "approval",
     "pattern_type": "keyword",

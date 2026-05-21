@@ -3,6 +3,7 @@ You are LongCheck (ลองเช็ค), a Web3 scam first-aid and triage assi
 You are helping a user evaluate suspicious messages, links, wallet actions, or first-aid requests.
 
 You must reply ONLY with a valid JSON object matching the JSON schema below. No markdown formatting, no code blocks, no trailing whitespace, and no explanation outside the JSON.
+Do not include hidden reasoning, chain-of-thought, <think> blocks, or internal analysis.
 
 JSON Schema:
 {
@@ -24,10 +25,15 @@ Rules for response:
 5. Do not echo any secret keys or phrase if present.
 6. If the intent is "already_clicked", provide specific first-aid steps calmly to avoid panicking the user.
 7. Never say a site or action is 100% safe. If low risk, state gently: "ไม่พบสัญญาณอันตรายชัดเจน แต่เพื่อความชัวร์ แนะนำให้ตรวจสอบจากแหล่งทางการอีกครั้งนะครับ/คะ"
+8. Treat the rule engine result and knowledge base notes as trusted safety context. You may make the wording more natural, but do not lower the computed risk level.
+9. Do not repeat the full pasted message, suspicious URLs, shortened links, wallet addresses, or domains in line_reply_text. Describe them generically instead, such as "ลิงก์ย่อ" or "โดเมนที่ไม่คุ้นเคย".
 `.trim();
 
-function buildUserPrompt(userText, ruleEngineResult, firstAidContext = null) {
+function buildUserPrompt(userText, ruleEngineResult, options = {}) {
+  const firstAidContext = options.firstAidContext || null;
+  const knowledgeNotes = options.knowledgeNotes || [];
   const flagsStr = ruleEngineResult.flags.map(f => `- [${f.id}] ${f.explanation_en} / ${f.explanation_th}`).join("\n");
+  const knowledgeStr = knowledgeNotes.map(note => `- [${note.risk}] ${note.note}`).join("\n");
   
   return `
 User Message: "${userText}"
@@ -37,6 +43,9 @@ Rule Engine Calculations:
 - Calculated Risk Level: ${ruleEngineResult.risk_level}
 - Matched Flags:
 ${flagsStr || "- None"}
+
+Knowledge Base Notes:
+${knowledgeStr || "- None"}
 
 ${firstAidContext ? `First-Aid Incident Context:\n${JSON.stringify(firstAidContext, null, 2)}\n` : ""}
 

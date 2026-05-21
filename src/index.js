@@ -35,5 +35,7 @@ app.listen(config.port, () => {
   console.log("[long-check] LINE webhook: POST /webhook");
   if (config.useMockLlm) {
     console.log("[long-check] Mock LLM mode is enabled.");
+  } else {
+    console.log(`[long-check] Local LLM mode enabled: ${config.localLlm.model} at ${config.localLlm.baseUrl}`);
   }
 });

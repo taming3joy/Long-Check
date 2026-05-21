@@ -7,8 +7,10 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "test:analyzer": "node workspaces/sister-risk-analyzer/testRiskAnalyzer.js",
+    "test:analyzer:llm": "USE_MOCK_LLM=false node workspaces/sister-risk-analyzer/testRiskAnalyzer.js",
     "test:simulator": "node workspaces/sister-risk-analyzer/chatSimulator.js",
-    "test:simulator:demo": "node workspaces/sister-risk-analyzer/chatSimulator.js --demo"
+    "test:simulator:demo": "node workspaces/sister-risk-analyzer/chatSimulator.js --demo",
+    "test:simulator:llm": "USE_MOCK_LLM=false node workspaces/sister-risk-analyzer/chatSimulator.js --demo"
   },
   "keywords": [
     "line",

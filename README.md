@@ -8,8 +8,8 @@ Long-Check is not a guaranteed scam detector. It is a checklist assistant that h
 
 - LINE webhook endpoint with Express.
 - Text message analysis for Web3, wallet, NFT, airdrop, and Thai transaction messages.
-- Mock analyzer enabled by default, so the app runs without API keys.
-- Optional OpenAI analyzer through a clean `analyzeRisk(userText)` wrapper.
+- Mock analyzer enabled by default, so the app runs without a local model.
+- Optional local Qwen3 4B analyzer through Ollama and the same clean `analyzeRisk(userText)` wrapper.
 - Simple keyword knowledge base for demo context.
 - LINE-safe response formatter.
 
@@ -20,7 +20,7 @@ LINE User
 → LINE Official Account
 → Webhook to Express backend
 → analyzeRisk(userText)
-→ LLM or mock analyzer
+→ Local Qwen3 4B LLM or mock analyzer
 → LINE reply
 ```
 
@@ -46,21 +46,35 @@ Mock mode is enabled by default:
 USE_MOCK_LLM=true
 ```
 
+To use local Qwen3 4B, install Ollama, pull the model, and set mock mode off:
+
+```bash
+ollama pull qwen3:4b
+```
+
+```env
+USE_MOCK_LLM=false
+OLLAMA_BASE_URL=http://localhost:11434/v1
+OLLAMA_MODEL=qwen3:4b
+```
+
 ## Environment Variables
 
 ```env
 PORT=3000
 LINE_CHANNEL_ACCESS_TOKEN=
 LINE_CHANNEL_SECRET=
-OPENAI_API_KEY=
 USE_MOCK_LLM=true
+OLLAMA_BASE_URL=http://localhost:11434/v1
+OLLAMA_MODEL=qwen3:4b
 ```
 
 - `PORT`: local server port.
 - `LINE_CHANNEL_ACCESS_TOKEN`: LINE Messaging API channel access token.
 - `LINE_CHANNEL_SECRET`: LINE Messaging API channel secret.
-- `OPENAI_API_KEY`: optional OpenAI API key.
 - `USE_MOCK_LLM`: use deterministic mock analysis when `true`.
+- `OLLAMA_BASE_URL`: OpenAI-compatible local Ollama endpoint.
+- `OLLAMA_MODEL`: local model name, default `qwen3:4b`.
 
 ## Run Locally
 
@@ -94,6 +108,12 @@ npm run test:analyzer
 
 This runs manual examples for High Risk, Medium Risk, and Low Risk. It works without API keys because mock mode is the default.
 
+To test with local Qwen3 4B, make sure Ollama is running and the model is pulled:
+
+```bash
+npm run test:analyzer:llm
+```
+
 ## LINE Webhook Setup Notes
 
 1. Create a LINE Official Account and Messaging API channel.
@@ -109,6 +129,8 @@ https://YOUR_DOMAIN/webhook
 6. Send text messages to the LINE Official Account and check the server logs.
 
 If LINE keys are missing, the server still starts and logs mock replies locally.
+
+If Ollama is unavailable while `USE_MOCK_LLM=false`, Long-Check falls back to the deterministic rule engine so the demo can continue.
 
 ## Team Workflow
 

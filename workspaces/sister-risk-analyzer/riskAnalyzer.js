@@ -1,10 +1,11 @@
 require("dotenv").config();
 
-const OpenAI = require("openai");
 const config = require("../../src/shared/config");
 const { RISK_LEVELS } = require("../../src/shared/riskLevels");
 const { SYSTEM_PROMPT, buildUserPrompt } = require("./prompt");
 const { redactSecrets } = require("./redactor");
+const { retrieveKnowledge } = require("./retrieval");
+const { callLocalQwen } = require("./localQwenClient");
 const rules = require("./rules.json");
 
 // Helper to determine risk level based on score & flags
@@ -182,16 +183,6 @@ async function analyzeRisk(userText) {
 
   // If secret detected, trigger immediate High Risk override response bypass
   if (redaction.secretDetected) {
-    const criticalResult = {
-      risk_score: 20,
-      risk_level: RISK_LEVELS.HIGH,
-      flags: [{
-        id: "R000",
-        explanation_th: `ตรวจพบข้อมูลลับส่วนตัวในข้อความ (${redaction.secretsFound.join(", ")})`,
-        explanation_en: `Detected sensitive wallet secrets in the text (${redaction.secretsFound.join(", ")})`
-      }]
-    };
-    
     return `⚠️ ลองเช็คพบความเสี่ยงขั้นสูงสุดครับ!\n\n` +
            `ด้วยความเป็นห่วงจากเรา ขอเตือนความปลอดภัยสูงสุดดังนี้ครับ:\n` +
            `• ระบบตรวจพบว่าคุณอาจพิมพ์ข้อมูลความลับของกระเป๋าเงิน (${redaction.secretsFound.join(", ")})\n` +
@@ -200,46 +191,24 @@ async function analyzeRisk(userText) {
            `• ขอแนะนำให้โอนสินทรัพย์ทั้งหมดไปยังกระเป๋าเงินใหม่ที่ปลอดภัยโดยด่วนที่สุด และเลิกใช้กระเป๋าเงินเดิมครับ`;
   }
 
-  // 3. Determine if we should call LLM
-  // Fallback to mock mode if explicitly configed or OpenAI API details are missing
-  const isOllamaMockMode = config.useMockLlm;
-  const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || "http://localhost:11434/v1";
-  const ollamaModel = process.env.OLLAMA_MODEL || "qwen3:4b";
+  // 3. Determine if we should call the local LLM.
+  const isMockMode = config.useMockLlm;
 
-  if (isOllamaMockMode) {
+  if (isMockMode) {
     return buildMockAnalysis(redaction.redactedText, ruleResult);
   }
 
   try {
-    // Connect to Local Ollama using OpenAI JS SDK compatibility
-    const client = new OpenAI({
-      baseURL: ollamaBaseUrl,
-      apiKey: "ollama" // Non-empty key for the SDK
+    const knowledgeNotes = retrieveKnowledge(redaction.redactedText);
+    const resultObj = await callLocalQwen({
+      baseUrl: config.localLlm.baseUrl,
+      model: config.localLlm.model,
+      systemPrompt: SYSTEM_PROMPT,
+      userPrompt: buildUserPrompt(redaction.redactedText, ruleResult, { knowledgeNotes })
     });
-
-    const userPrompt = buildUserPrompt(redaction.redactedText, ruleResult);
-
-    const response = await client.chat.completions.create({
-      model: ollamaModel,
-      temperature: 0.1,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userPrompt }
-      ],
-      response_format: { type: "json_object" }
-    });
-
-    const responseText = response.choices[0] && response.choices[0].message
-      ? response.choices[0].message.content.trim()
-      : "";
-
-    if (responseText) {
-      const resultObj = JSON.parse(responseText);
-      
-      // Update/Ensure the final reply text is populated
-      if (resultObj.line_reply_text) {
-        return resultObj.line_reply_text;
-      }
+    
+    if (resultObj.line_reply_text) {
+      return resultObj.line_reply_text;
     }
     
     return buildMockAnalysis(redaction.redactedText, ruleResult);
@@ -286,11 +255,9 @@ async function analyzeRiskDetailed(userText) {
     };
   }
 
-  const isOllamaMockMode = config.useMockLlm;
-  const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || "http://localhost:11434/v1";
-  const ollamaModel = process.env.OLLAMA_MODEL || "qwen3:4b";
+  const isMockMode = config.useMockLlm;
 
-  if (isOllamaMockMode) {
+  if (isMockMode) {
     return {
       intent: "check_message",
       language: "th",
@@ -314,40 +281,22 @@ async function analyzeRiskDetailed(userText) {
   }
 
   try {
-    const client = new OpenAI({
-      baseURL: ollamaBaseUrl,
-      apiKey: "ollama"
+    const knowledgeNotes = retrieveKnowledge(redaction.redactedText);
+    const parsed = await callLocalQwen({
+      baseUrl: config.localLlm.baseUrl,
+      model: config.localLlm.model,
+      systemPrompt: SYSTEM_PROMPT,
+      userPrompt: buildUserPrompt(redaction.redactedText, ruleResult, { knowledgeNotes })
     });
-
-    const userPrompt = buildUserPrompt(redaction.redactedText, ruleResult);
-
-    const response = await client.chat.completions.create({
-      model: ollamaModel,
-      temperature: 0.1,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userPrompt }
-      ],
-      response_format: { type: "json_object" }
-    });
-
-    const responseText = response.choices[0] && response.choices[0].message
-      ? response.choices[0].message.content.trim()
-      : "";
-
-    if (responseText) {
-      const parsed = JSON.parse(responseText);
-      // Ensure risk_level matches rule engine
-      parsed.risk_level = ruleResult.risk_level;
-      parsed.risk_score = ruleResult.risk_score;
-      parsed.detected_flags = ruleResult.flags.map(f => ({
-        flag_id: f.id,
-        label: f.explanation_th,
-        evidence: f.explanation_en,
-        score: f.weight
-      }));
-      return parsed;
-    }
+    parsed.risk_level = ruleResult.risk_level;
+    parsed.risk_score = ruleResult.risk_score;
+    parsed.detected_flags = ruleResult.flags.map(f => ({
+      flag_id: f.id,
+      label: f.explanation_th,
+      evidence: f.explanation_en,
+      score: f.weight
+    }));
+    return parsed;
   } catch (error) {
     console.warn("[long-check] Local LLM connection failed. Falling back.", error.message);
   }

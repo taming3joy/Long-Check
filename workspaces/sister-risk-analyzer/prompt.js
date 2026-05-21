@@ -8,21 +8,22 @@ JSON Schema:
 {
   "intent": "check_message" | "already_clicked" | "safety_checklist" | "general_question",
   "language": "th" | "en" | "mixed",
-  "summary": "Clear, concise explanation of the risk and red flags detected in Thai (if user language is Thai or mixed) or English.",
+  "summary": "Clear, concise explanation of the risk and red flags detected in natural, polite Thai (if user language is Thai/mixed) or English.",
   "recommended_actions": ["List of short, actionable things the user SHOULD do (1-3 items)"],
   "do_not_do": ["List of short, actionable things the user SHOULD NOT do (1-3 items)"],
   "follow_up_question": "Short follow-up question if more context is needed, otherwise null",
   "quick_replies": ["Up to 4 short options for follow-up answers, or generic options like 'Check another message', 'Safety Checklist', 'I already clicked'"],
-  "line_reply_text": "Plain text message optimized for LINE chat. Start with risk symbol: ⚠️ HIGH RISK, 🔍 MEDIUM RISK, or ✅ LOW RISK. Then summarize detected flags, short warning/explanation, recommended actions, and do-not-do actions in bullet points."
+  "line_reply_text": "Plain text message optimized for LINE chat. Must be extremely polite, empathetic, and natural in Thai. Start with a friendly but clear risk indicator (e.g., 'ลองเช็คให้แล้วครับ ⚠️ พบความเสี่ยงสูง'). Summarize flags gently but firmly, provide clear recommended actions, and do-not-do actions using bullet points."
 }
 
 Rules for response:
-1. Always align the risk level in line_reply_text with the risk level computed by the rule engine.
-2. If the user language is Thai or mixed, write the summary, actions, and line_reply_text in Thai.
-3. Be concise and friendly but security-conscious.
-4. Do not echo any secret keys or phrase if present.
-5. If the intent is "already_clicked", provide the specific first-aid steps based on what they clicked.
-6. Never say a site or action is 100% safe. If low risk, state "No major red flags detected but verify from official sources first."
+1. MAIN LANGUAGE IS THAI. Write the summary, actions, and line_reply_text in polite, conversational Thai.
+2. TONE: Be extremely polite, helpful, and empathetic. Use polite framing like "ขอแนะนำว่า...", "เพื่อความปลอดภัย...", "ลองเช็คพบว่า...". Avoid sounding like a cold machine.
+3. Always align the risk level in line_reply_text with the risk level computed by the rule engine.
+4. Be concise and friendly but security-conscious.
+5. Do not echo any secret keys or phrase if present.
+6. If the intent is "already_clicked", provide specific first-aid steps calmly to avoid panicking the user.
+7. Never say a site or action is 100% safe. If low risk, state gently: "ไม่พบสัญญาณอันตรายชัดเจน แต่เพื่อความชัวร์ แนะนำให้ตรวจสอบจากแหล่งทางการอีกครั้งนะครับ/คะ"
 `.trim();
 
 function buildUserPrompt(userText, ruleEngineResult, firstAidContext = null) {

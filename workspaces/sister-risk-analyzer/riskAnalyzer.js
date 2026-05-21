@@ -134,42 +134,39 @@ function evaluateRules(text) {
 
 // Fallback response compiler
 function buildMockAnalysis(redactedText, ruleResult) {
-  const riskSymbol = ruleResult.risk_level === RISK_LEVELS.HIGH ? "⚠️ HIGH RISK" : (ruleResult.risk_level === RISK_LEVELS.MEDIUM ? "🔍 MEDIUM RISK" : "✅ LOW RISK");
+  const riskSymbol = ruleResult.risk_level === RISK_LEVELS.HIGH ? "⚠️ ลองเช็คพบความเสี่ยงสูงมากครับ" : (ruleResult.risk_level === RISK_LEVELS.MEDIUM ? "🔍 ลองเช็คพบความเสี่ยงปานกลางครับ" : "✅ ลองเช็คแล้วปลอดภัยในเบื้องต้นครับ");
   
   let lines = [];
-  lines.push(`Long-Check Risk Analysis (${riskSymbol})`);
-  lines.push("");
-  lines.push(`Risk Level: ${ruleResult.risk_level}`);
+  lines.push(`${riskSymbol}`);
   lines.push("");
   
   if (ruleResult.flags.length > 0) {
-    lines.push("เหตุผลที่น่าสงสัย / Red Flags:");
+    lines.push("สาเหตุที่ทำให้ดูน่าสงสัยนะครับ/คะ:");
     ruleResult.flags.forEach(f => {
-      lines.push(`• ${f.explanation_th} (${f.explanation_en})`);
+      lines.push(`• ${f.explanation_th}`);
     });
   } else {
-    lines.push("เหตุผลที่น่าสงสัย / Red Flags:");
-    lines.push("• ไม่พบสัญญาณเสี่ยงรุนแรงที่ตรวจจับได้จากเนื้อหา");
+    lines.push("จากข้อความ ไม่พบสัญญาณอันตรายที่ชัดเจนครับ");
   }
   
   lines.push("");
-  lines.push("คำแนะนำที่ควรทำ / Do:");
+  lines.push("💡 สิ่งที่แนะนำให้ทำเพื่อความปลอดภัย:");
   if (ruleResult.risk_level === RISK_LEVELS.HIGH) {
-    lines.push("• หยุดทำรายการทุกอย่างบนกระเป๋าเงินทันที");
-    lines.push("• ตรวจสอบประกาศแจ้งเตือนอย่างเป็นทางการจากแหล่งที่เชื่อถือได้");
+    lines.push("• ขอแนะนำให้หยุดทำรายการทุกอย่างบนกระเป๋าเงินทันทีครับ");
+    lines.push("• รบกวนตรวจสอบประกาศแจ้งเตือนจากช่องทางที่เป็นทางการเท่านั้นนะครับ");
   } else if (ruleResult.risk_level === RISK_LEVELS.MEDIUM) {
-    lines.push("• ตรวจสอบความถูกต้องของเว็บไซต์และผู้ส่งก่อนดำเนินการต่อ");
-    lines.push("• อย่าเพิ่งด่วนเชื่อมต่อ wallet หรือกดยืนยัน");
+    lines.push("• รบกวนตรวจสอบความถูกต้องของเว็บไซต์และผู้ส่งก่อนดำเนินการต่อนะครับ");
+    lines.push("• อย่าเพิ่งด่วนเชื่อมต่อ wallet หรือกดยืนยันใดๆ นะครับ");
   } else {
-    lines.push("• สังเกตชื่อโดเมน URL ก่อนกรอกข้อมูลหรือกดลิงก์");
-    lines.push("• ยืนยันข้อมูลผ่านช่องทางการของโปรเจกต์เสมอ");
+    lines.push("• ควรสังเกตชื่อโดเมน URL ให้แน่ใจก่อนกรอกข้อมูลหรือกดลิงก์ครับ");
+    lines.push("• เพื่อความชัวร์ แนะนำให้ยืนยันข้อมูลผ่านช่องทางการของโปรเจกต์เสมอนะครับ");
   }
   
   lines.push("");
-  lines.push("ข้อควรระวัง / Don't:");
-  lines.push("• ห้ามส่ง seed phrase หรือ private key ให้ผู้ใดในทุกกรณี");
+  lines.push("🛑 สิ่งที่ควรหลีกเลี่ยงอย่างยิ่ง:");
+  lines.push("• ไม่ส่ง seed phrase หรือ private key ให้ผู้ใดในทุกกรณีครับ");
   if (ruleResult.risk_level === RISK_LEVELS.HIGH || ruleResult.risk_level === RISK_LEVELS.MEDIUM) {
-    lines.push("• ห้ามเซ็นอนุมัติ token approval หรือเซ็นธุรกรรมที่ไม่น่าไว้วางใจ");
+    lines.push("• หลีกเลี่ยงการเซ็นอนุมัติ token approval หรือเซ็นธุรกรรมที่ไม่น่าไว้วางใจครับ");
   }
 
   return lines.join("\n");
@@ -195,16 +192,12 @@ async function analyzeRisk(userText) {
       }]
     };
     
-    return `⚠️ CRITICAL RISK / ความเสี่ยงสูงมาก\n\n` +
-           `คำเตือนความปลอดภัยสูงสุด:\n` +
-           `• ตรวจพบว่าคุณป้อนข้อมูลความลับกระเป๋าเงิน (${redaction.secretsFound.join(", ")})\n` +
-           `• ห้ามส่งข้อมูลนี้ในแชทให้ใครเด็ดขาด\n` +
-           `• หากส่งข้อมูลนี้ไปในระบบอื่นหรือแชทอื่นแล้ว ให้ถือว่ากระเป๋าเงินนั้นเสี่ยงถูกแฮ็กหรือถูกขโมยสินทรัพย์ทันที\n` +
-           `• แนะนำให้โอนสินทรัพย์ทั้งหมดไปยังกระเป๋าเงินใหม่โดยด่วนที่สุด และเลิกใช้กระเป๋าเงินเดิม\n\n` +
-           `Security Warning:\n` +
-           `• Detected wallet secret information in your message.\n` +
-           `• NEVER share this with anyone.\n` +
-           `• If shared elsewhere, your wallet is compromised. Transfer assets to a new wallet immediately.`;
+    return `⚠️ ลองเช็คพบความเสี่ยงขั้นสูงสุดครับ!\n\n` +
+           `ด้วยความเป็นห่วงจากเรา ขอเตือนความปลอดภัยสูงสุดดังนี้ครับ:\n` +
+           `• ระบบตรวจพบว่าคุณอาจพิมพ์ข้อมูลความลับของกระเป๋าเงิน (${redaction.secretsFound.join(", ")})\n` +
+           `• รบกวนอย่าส่งข้อมูลนี้ในแชทให้ใครเด็ดขาดเลยนะครับ\n` +
+           `• หากคุณเผลอส่งข้อมูลนี้ไปในเว็บอื่นหรือให้คนอื่นแล้ว ขอให้ถือว่ากระเป๋าเงินนั้นไม่ปลอดภัยและเสี่ยงถูกขโมยสินทรัพย์ทันทีครับ\n` +
+           `• ขอแนะนำให้โอนสินทรัพย์ทั้งหมดไปยังกระเป๋าเงินใหม่ที่ปลอดภัยโดยด่วนที่สุด และเลิกใช้กระเป๋าเงินเดิมครับ`;
   }
 
   // 3. Determine if we should call LLM
@@ -284,16 +277,12 @@ async function analyzeRiskDetailed(userText) {
         "อย่าส่งรหัสหรือคีย์ให้ผู้อื่นเด็ดขาด"
       ],
       follow_up_question: null,
-      line_reply_text: `⚠️ CRITICAL RISK / ความเสี่ยงสูงมาก\n\n` +
-        `คำเตือนความปลอดภัยสูงสุด:\n` +
-        `• ตรวจพบว่าคุณป้อนข้อมูลความลับกระเป๋าเงิน (${redaction.secretsFound.join(", ")})\n` +
-        `• ห้ามส่งข้อมูลนี้ในแชทให้ใครเด็ดขาด\n` +
-        `• หากส่งข้อมูลนี้ไปในระบบอื่นหรือแชทอื่นแล้ว ให้ถือว่ากระเป๋าเงินนั้นเสี่ยงถูกแฮ็กหรือถูกขโมยสินทรัพย์ทันที\n` +
-        `• แนะนำให้โอนสินทรัพย์ทั้งหมดไปยังกระเป๋าเงินใหม่โดยด่วนที่สุด และเลิกใช้กระเป๋าเงินเดิม\n\n` +
-        `Security Warning:\n` +
-        `• Detected wallet secret information in your message.\n` +
-        `• NEVER share this with anyone.\n` +
-        `• If shared elsewhere, your wallet is compromised. Transfer assets to a new wallet immediately.`
+      line_reply_text: `⚠️ ลองเช็คพบความเสี่ยงขั้นสูงสุดครับ!\n\n` +
+        `ด้วยความเป็นห่วงจากเรา ขอเตือนความปลอดภัยสูงสุดดังนี้ครับ:\n` +
+        `• ระบบตรวจพบว่าคุณอาจพิมพ์ข้อมูลความลับของกระเป๋าเงิน (${redaction.secretsFound.join(", ")})\n` +
+        `• รบกวนอย่าส่งข้อมูลนี้ในแชทให้ใครเด็ดขาดเลยนะครับ\n` +
+        `• หากคุณเผลอส่งข้อมูลนี้ไปในเว็บอื่นหรือให้คนอื่นแล้ว ขอให้ถือว่ากระเป๋าเงินนั้นไม่ปลอดภัยและเสี่ยงถูกขโมยสินทรัพย์ทันทีครับ\n` +
+        `• ขอแนะนำให้โอนสินทรัพย์ทั้งหมดไปยังกระเป๋าเงินใหม่ที่ปลอดภัยโดยด่วนที่สุด และเลิกใช้กระเป๋าเงินเดิมครับ`
     };
   }
 

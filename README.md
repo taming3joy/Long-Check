@@ -7,6 +7,7 @@ Long-Check is not a guaranteed scam detector. It is a checklist assistant that h
 ## What It Does
 
 - Receives messages from a LINE Official Account webhook.
+- Supports short conversation-based risk checks with up to 2 follow-up questions.
 - Analyzes text messages with a deterministic rule engine.
 - Optionally uses a local Qwen model through Ollama to write more natural Thai replies.
 - Redacts obvious secrets before LLM calls.
@@ -19,7 +20,8 @@ Long-Check is not a guaranteed scam detector. It is a checklist assistant that h
 LINE User
 → LINE Official Account
 → Express webhook /webhook
-→ analyzeRisk(userText)
+→ in-memory session store
+→ analyzeRisk(userText, conversationOptions)
 → secret redactor + rule engine + knowledge notes
 → local Qwen/Ollama reply or rule-engine fallback
 → LINE reply
@@ -30,6 +32,7 @@ Key files:
 - `src/index.js`: Express server.
 - `src/line/lineWebhook.js`: LINE event handling.
 - `src/line/lineClient.js`: LINE reply wrapper.
+- `src/shared/sessionStore.js`: in-memory conversation sessions and limits.
 - `workspaces/sister-risk-analyzer/riskAnalyzer.js`: main analyzer interface.
 - `workspaces/sister-risk-analyzer/rules.json`: risk rules and scoring.
 - `workspaces/sister-risk-analyzer/prompt.js`: local LLM prompt.
@@ -98,7 +101,26 @@ Ollama should serve locally at:
 http://localhost:11434
 ```
 
-## 4. Test the Analyzer
+## 4. Conversation Behavior
+
+Long-Check no longer has to answer everything in one turn. It can ask a short follow-up question when one important detail is missing, then produce a final summary.
+
+Supported user commands in LINE:
+
+- `สรุป`: summarize the current case now.
+- `เริ่มใหม่`: reset the current conversation.
+- `ช่วยเหลือ`: show a short usage guide.
+
+Session limits:
+
+- Max follow-up questions: 2.
+- Max user messages per session: 6.
+- Session expires after 30 minutes of inactivity.
+- Only the most recent 10 messages are sent to the local LLM.
+
+Sessions are stored in memory with a JavaScript `Map`. They reset when the server restarts. There is no database.
+
+## 5. Test the Analyzer
 
 Rule-engine/mock test:
 
@@ -120,7 +142,7 @@ OLLAMA_UNLOAD_AFTER_TEST=false npm run test:analyzer:llm
 
 If Ollama is unavailable, the test should not crash. It should log a warning and fall back to the rule-engine reply.
 
-## 5. Start the Server
+## 6. Start the Server
 
 ```bash
 npm start
@@ -152,7 +174,7 @@ When you stop the server normally with Ctrl+C, Long-Check asks Ollama to unload 
 
 If the process is killed forcefully, this cleanup may not run. In that case, unload manually with `npm run ollama:unload` or `ollama stop qwen3:8b`.
 
-## 6. Expose Local Server to LINE
+## 7. Expose Local Server to LINE
 
 If using the local ngrok binary in this repo:
 
@@ -170,7 +192,7 @@ https://your-ngrok-url.ngrok-free.dev/webhook
 
 Use that as the webhook URL in the LINE Developers Console.
 
-## 7. LINE Setup
+## 8. LINE Setup
 
 In LINE Developers Console:
 
@@ -186,7 +208,7 @@ In LINE Official Account Manager:
 - Turn webhook/bot mode on.
 - Turn greeting messages and auto-response messages off for a cleaner demo.
 
-## 8. Demo Messages
+## 9. Demo Messages
 
 High Risk:
 
@@ -212,6 +234,22 @@ Low Risk:
 ควรตรวจสอบจากแหล่งทางการและ official website ก่อนทำรายการทุกครั้ง
 ```
 
+Conversation demo:
+
+```text
+มีคนบอกว่าได้ airdrop แต่ยังไม่แน่ใจ
+```
+
+Expected: Long-Check asks one follow-up question.
+
+Then reply:
+
+```text
+มาจาก DM คนแปลกหน้าครับ
+```
+
+Expected: Long-Check produces a final risk summary.
+
 ## Team Workflow
 
 Taming works mainly in:
@@ -227,10 +265,19 @@ Sister works mainly in:
 The shared interface is:
 
 ```js
-analyzeRisk(userText)
+analyzeRisk(userText, options)
 ```
 
-It accepts plain text and returns plain text ready to send to LINE.
+It accepts user text plus optional conversation context and returns:
+
+```js
+{
+  mode: "ASK_FOLLOW_UP" | "FINAL_SUMMARY" | "ANSWER_AND_CONTINUE" | "OUT_OF_SCOPE",
+  reply: "text to send to LINE",
+  riskLevel: "Low Risk" | "Medium Risk" | "High Risk" | null,
+  shouldEndSession: true | false
+}
+```
 
 ## Useful Scripts
 
@@ -241,6 +288,7 @@ npm run test:analyzer
 npm run test:analyzer:llm
 npm run test:simulator:demo
 npm run test:simulator:llm
+npm run ollama:unload
 ```
 
 ## Troubleshooting
@@ -296,4 +344,5 @@ ollama stop qwen3:8b
 - It does not connect to wallets.
 - It does not verify official domains automatically yet.
 - It does not implement image upload, wallet connection, payment, login, database, scraping, or blockchain scanning.
+- Conversation sessions are in memory only and reset when the server restarts.
 - Local model quality and speed depend on the machine running Ollama.

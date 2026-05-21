@@ -403,7 +403,7 @@ function determineRiskLevel(combinedText, signals, forceSummary) {
 
 function buildReason(riskLevel, signals) {
   if (riskLevel === RISK_LEVELS.HIGH) {
-    return "ข้อความมีสัญญาณเสี่ยงสูง เช่น การเร่งให้ทำรายการ ลิงก์ที่ไม่น่าไว้ใจ หรือการขอให้เชื่อมกระเป๋า/เซ็น/อนุมัติโทเคน. การกระทำเหล่านี้อาจทำให้เสียทรัพย์สินได้. Long-Check ไม่สามารถยืนยัน scam ได้ 100% แต่สัญญาณตอนนี้ควรหยุดก่อน.";
+    return "ข้อความมีสัญญาณเสี่ยงสูง เช่น การเร่งให้ทำรายการ ลิงก์ที่ไม่น่าไว้ใจ หรือการขอให้เชื่อมกระเป๋า/เซ็น/อนุมัติโทเคน. การกระทำเหล่านี้อาจทำให้เสียทรัพย์สินได้. ลองเช็คไม่สามารถยืนยัน scam ได้ 100% แต่สัญญาณตอนนี้ควรหยุดก่อน.";
   }
 
   if (riskLevel === RISK_LEVELS.MEDIUM) {
@@ -411,10 +411,10 @@ function buildReason(riskLevel, signals) {
   }
 
   if (signals.officialSource === "Yes") {
-    return "ข้อความเน้นการตรวจสอบจากแหล่งทางการและยังไม่พบคำขอให้ทำธุรกรรมเสี่ยง. อย่างไรก็ตาม ไม่ควรกดลิงก์หรือเชื่อมกระเป๋าหากยังไม่ตรวจสอบโดเมนเอง. Long-Check เป็นเพียงผู้ช่วยเช็กลิสต์ความเสี่ยง.";
+    return "ข้อความเน้นการตรวจสอบจากแหล่งทางการและยังไม่พบคำขอให้ทำธุรกรรมเสี่ยง. อย่างไรก็ตาม ไม่ควรกดลิงก์หรือเชื่อมกระเป๋าหากยังไม่ตรวจสอบโดเมนเอง. ลองเช็คเป็นเพียงผู้ช่วยเช็กลิสต์ความเสี่ยง.";
   }
 
-  return "จากข้อมูลที่มี ยังไม่พบสัญญาณอันตรายชัดเจน. แต่ข้อมูลบางส่วนอาจยังไม่ครบ จึงควรตรวจสอบแหล่งที่มาอีกครั้ง. Long-Check ไม่สามารถรับประกันความปลอดภัยได้ 100%.";
+  return "จากข้อมูลที่มี ยังไม่พบสัญญาณอันตรายชัดเจน. แต่ข้อมูลบางส่วนอาจยังไม่ครบ จึงควรตรวจสอบแหล่งที่มาอีกครั้ง. ลองเช็คไม่สามารถรับประกันความปลอดภัยได้ 100%.";
 }
 
 function buildSuggestion(riskLevel) {
@@ -432,7 +432,7 @@ function buildSuggestion(riskLevel) {
 function buildFinalSummary({ riskLevel, signals }) {
   return {
     mode: MODES.FINAL_SUMMARY,
-    reply: `Long-Check Risk Summary
+    reply: `ลองเช็ค Risk Summary
 
 Risk Level: ${riskLevel}
 
@@ -457,7 +457,7 @@ ${buildSuggestion(riskLevel)}`,
 function buildAnswerAndContinue() {
   return {
     mode: MODES.ANSWER_AND_CONTINUE,
-    reply: "โดยทั่วไปให้ตรวจสอบจากช่องทาง official เองก่อนเสมอ อย่ากดลิงก์จาก DM และอย่า connect wallet, sign message หรือ approve token ถ้ายังไม่แน่ใจครับ\n\nถ้าต้องการให้ลองเช็กสรุปความเสี่ยงของเคสนี้ พิมพ์ \"สรุป\" ได้เลยครับ",
+    reply: "โดยทั่วไปให้ตรวจสอบจากช่องทาง official เองก่อนเสมอ อย่ากดลิงก์จาก DM และอย่า connect wallet, sign message หรือ approve token ถ้ายังไม่แน่ใจครับ\n\nถ้าต้องการให้ลองเช็คสรุปความเสี่ยงของเคสนี้ พิมพ์ \"สรุป\" ได้เลยครับ",
     riskLevel: null,
     shouldEndSession: false
   };
@@ -466,7 +466,14 @@ function buildAnswerAndContinue() {
 function buildOutOfScope() {
   return {
     mode: MODES.OUT_OF_SCOPE,
-    reply: "Long-Check โฟกัสที่การเช็กความเสี่ยงของธุรกรรม ข้อความ Web3/crypto ความปลอดภัยของ wallet และความเสี่ยง scam ออนไลน์ครับ\n\nคุณสามารถวางข้อความหรือลิงก์ที่น่าสงสัยให้ช่วยเช็กได้เลยครับ",
+    reply: `ลองเช็คโฟกัสที่การตรวจสอบความเสี่ยงจาก Web3, crypto, wallet, เว็บไซต์ที่น่าสงสัย หรือข้อความที่อาจเป็นการหลอกลวงครับ
+
+คุณสามารถส่งข้อความหรือลิงก์ที่น่าสงสัยมาให้ตรวจสอบได้ครับ
+
+คำสั่งที่ใช้ได้:
+- "สรุป" = สรุปความเสี่ยงตอนนี้
+- "เริ่มใหม่" = เริ่มเคสใหม่
+- "ช่วยเหลือ" = ดูวิธีใช้`,
     riskLevel: null,
     shouldEndSession: false
   };

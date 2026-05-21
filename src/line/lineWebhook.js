@@ -14,7 +14,7 @@ const {
 } = require("../shared/sessionStore");
 const { analyzeRisk } = require("../../workspaces/sister-risk-analyzer/riskAnalyzer");
 
-const HELP_MESSAGE = `ลองเช็กช่วยวิเคราะห์ความเสี่ยงของข้อความหรือธุรกรรมที่น่าสงสัยครับ
+const HELP_MESSAGE = `ลองเช็คช่วยวิเคราะห์ความเสี่ยงของข้อความหรือธุรกรรมที่น่าสงสัยครับ
 
 วิธีใช้:
 1. วางข้อความหรือลิงก์ที่อยากให้ช่วยเช็ก
@@ -23,10 +23,10 @@ const HELP_MESSAGE = `ลองเช็กช่วยวิเคราะห�
 4. พิมพ์ "เริ่มใหม่" เพื่อเริ่มเคสใหม่
 
 ข้อจำกัด:
-ลองเช็กเป็นผู้ช่วยเช็กลิสต์ความเสี่ยง ไม่สามารถยืนยันได้ 100% ว่าเป็น scam หรือไม่`;
+ลองเช็คเป็นผู้ช่วยเช็กลิสต์ความเสี่ยง ไม่สามารถยืนยันได้ 100% ว่าเป็น scam หรือไม่`;
 
-const START_MESSAGE = "เริ่มเคสใหม่แล้วครับ วางข้อความหรือลิงก์ที่อยากให้ลองเช็กได้เลย";
-const EMPTY_MESSAGE = "ส่งข้อความหรือลิงก์ที่อยากให้ลองเช็กได้เลยครับ หรือพิมพ์ \"ช่วยเหลือ\" เพื่อดูวิธีใช้";
+const START_MESSAGE = "เริ่มเคสใหม่แล้วครับ วางข้อความหรือลิงก์ที่อยากให้ลองเช็คได้เลย";
+const EMPTY_MESSAGE = "ส่งข้อความหรือลิงก์ที่อยากให้ลองเช็คได้เลยครับ หรือพิมพ์ \"ช่วยเหลือ\" เพื่อดูวิธีใช้";
 
 function getSessionKey(event) {
   const source = event.source || {};
@@ -39,7 +39,7 @@ async function handleMessageEvent(event) {
   }
 
   if (!event.message || event.message.type !== "text") {
-    await replyText(event.replyToken, "Long-Check MVP รองรับข้อความตัวอักษรเท่านั้นในตอนนี้");
+    await replyText(event.replyToken, "ลองเช็ค MVP รองรับข้อความตัวอักษรเท่านั้นในตอนนี้");
     return;
   }
 

@@ -1,0 +1,56 @@
+[
+  {
+    "id": "seed-phrase",
+    "keywords": ["seed phrase", "recovery phrase", "mnemonic", "12 words", "24 words", "วลี seed", "วลีกู้คืน", "คำกู้คืน"],
+    "risk": "High Risk",
+    "note": "Legitimate support teams should never ask for a seed phrase or recovery phrase."
+  },
+  {
+    "id": "private-key",
+    "keywords": ["private key", "secret key", "export key", "คีย์ส่วนตัว", "ไพรเวทคีย์"],
+    "risk": "High Risk",
+    "note": "Anyone with a private key can control the wallet. Requests for it are high risk."
+  },
+  {
+    "id": "airdrop",
+    "keywords": ["airdrop", "claim reward", "รับแอร์ดรอป", "แจกเหรียญ", "รับรางวัล"],
+    "risk": "Medium Risk",
+    "note": "Airdrop claims can be legitimate, but fake claim pages often push users to connect wallets or sign unsafe approvals."
+  },
+  {
+    "id": "connect-wallet",
+    "keywords": ["connect wallet", "wallet connect", "เชื่อมกระเป๋า", "เชื่อมต่อ wallet", "connect metamask"],
+    "risk": "Medium Risk",
+    "note": "Connecting a wallet exposes wallet address information and may lead to signature or approval prompts."
+  },
+  {
+    "id": "sign-message",
+    "keywords": ["sign message", "signature", "sign in wallet", "เซ็นข้อความ", "เซ็นธุรกรรม", "ลงนาม"],
+    "risk": "High Risk",
+    "note": "Wallet signatures can authorize actions. Users should only sign after understanding the source and exact request."
+  },
+  {
+    "id": "approve-token",
+    "keywords": ["approve token", "token approval", "approve unlimited", "set approval", "อนุมัติโทเคน", "อนุมัติไม่จำกัด"],
+    "risk": "High Risk",
+    "note": "Token approvals can let another contract move tokens. Unlimited approvals from unknown sites are high risk."
+  },
+  {
+    "id": "urgent-claim",
+    "keywords": ["urgent", "last chance", "limited time", "claim now", "ด่วน", "หมดเขต", "ภายใน 10 นาที", "โอกาสสุดท้าย"],
+    "risk": "High Risk",
+    "note": "Urgency and pressure are common scam tactics that reduce careful checking."
+  },
+  {
+    "id": "official-source",
+    "keywords": ["official", "official website", "verified", "ประกาศทางการ", "เว็บทางการ", "ตรวจสอบจากแหล่งทางการ"],
+    "risk": "Low Risk",
+    "note": "Verifying through official channels lowers risk, but the user should still inspect links and wallet prompts."
+  },
+  {
+    "id": "suspicious-domain",
+    "keywords": ["bit.ly", "tinyurl", "strange domain", "suspicious link", "http://", "คลิกลิงก์", "ลิงก์แปลก", "โดเมนแปลก"],
+    "risk": "Medium Risk",
+    "note": "Shortened links, unfamiliar domains, and plain HTTP links can hide the real destination."
+  }
+]

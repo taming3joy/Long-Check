@@ -1,0 +1,28 @@
+{
+  "name": "long-check",
+  "version": "0.1.0",
+  "description": "LINE chatbot MVP that analyzes pasted Web3 or Thai transaction messages for risk signals.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test:analyzer": "node workspaces/sister-risk-analyzer/testRiskAnalyzer.js"
+  },
+  "keywords": [
+    "line",
+    "chatbot",
+    "web3",
+    "risk",
+    "thai"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@line/bot-sdk": "^10.2.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "openai": "^4.77.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
